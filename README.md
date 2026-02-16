@@ -3,14 +3,11 @@
 Reusable, event-driven arcade framework for PocketMine-MP game developers.
 
 ## Documentation
-
-- Full API docs: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
-- Architecture guide: [ARCADE_SDK_ARCHITECTURE.md](ARCADE_SDK_ARCHITECTURE.md)
+WIP
 
 ## Goals
 
 - Virion only (no plugin lifecycle methods)
-- No monetization, Tebex, or HTTP logic
 - Interface-first and dependency-injected architecture
 - Game session lifecycle with custom events
 - Extensible for third-party game implementations

@@ -1,8 +1,8 @@
-name: ArcadeSDK
+name: ArcadeEngine
 version: 0.1.0
-antigen: ninjaknights/arcade-sdk
+antigen: ninjaknights\nk-arcade-engine
 api: 5.0.0
-php: 8.1
+author: NinjaKnights
 authors:
-  - NinjaKnights
+  - jeantkg
 description: Reusable arcade framework virion for PocketMine-MP

@@ -8,22 +8,22 @@ use ninjaknights\arcade\player\ArcadePlayer;
 
 interface SessionLocatorInterface {
 
-    public function findById(string $sessionId) : ?GameSession;
+	public function findById(string $sessionId) : ?GameSession;
 
-    public function findByPlayer(ArcadePlayer $player) : ?GameSession;
+	public function findByPlayer(ArcadePlayer $player) : ?GameSession;
 
-    /**
-     * @return list<GameSession>
-     */
-    public function findByGameId(string $gameId) : array;
+	/**
+	 * @return list<GameSession>
+	 */
+	public function findByGameId(string $gameId) : array;
 
-    /**
-     * @return list<GameSession>
-     */
-    public function findByState(GameState $state) : array;
+	/**
+	 * @return list<GameSession>
+	 */
+	public function findByState(GameState $state) : array;
 
-    /**
-     * @return array<string, GameSession>
-     */
-    public function all() : array;
+	/**
+	 * @return array<string, GameSession>
+	 */
+	public function all() : array;
 }

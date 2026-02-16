@@ -10,13 +10,13 @@ use ninjaknights\arcade\player\ArcadePlayer;
 
 interface SessionLifecyclePolicyInterface {
 
-    public function canJoin(GameSession $gameSession, ArcadePlayer $player) : bool;
+	public function canJoin(GameSession $gameSession, ArcadePlayer $player) : bool;
 
-    public function canTransition(GameSession $gameSession, GameState $from, GameState $to) : bool;
+	public function canTransition(GameSession $gameSession, GameState $from, GameState $to) : bool;
 
-    public function canStart(GameSession $gameSession) : bool;
+	public function canStart(GameSession $gameSession) : bool;
 
-    public function shouldAutoCloseWhenEmpty(GameSession $gameSession) : bool;
+	public function shouldAutoCloseWhenEmpty(GameSession $gameSession) : bool;
 
-    public function shouldCloseForIdle(GameSession $gameSession, int $currentUnixTime) : bool;
+	public function shouldCloseForIdle(GameSession $gameSession, int $currentUnixTime) : bool;
 }

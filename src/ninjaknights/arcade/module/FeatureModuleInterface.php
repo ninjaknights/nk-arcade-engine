@@ -8,9 +8,9 @@ use ninjaknights\arcade\ArcadeEngine;
 
 interface FeatureModuleInterface {
 
-    public function getId() : string;
+	public function getId() : string;
 
-    public function onRegistered(ArcadeEngine $engine) : void;
+	public function onRegistered(ArcadeEngine $engine) : void;
 
-    public function onUnregistered(ArcadeEngine $engine) : void;
+	public function onUnregistered(ArcadeEngine $engine) : void;
 }

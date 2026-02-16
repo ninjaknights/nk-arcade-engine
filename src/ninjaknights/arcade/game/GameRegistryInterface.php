@@ -6,16 +6,16 @@ namespace ninjaknights\arcade\game;
 
 interface GameRegistryInterface {
 
-    public function register(Game $game) : void;
+	public function register(Game $game) : void;
 
-    public function unregister(string $id) : void;
+	public function unregister(string $id) : void;
 
-    public function has(string $id) : bool;
+	public function has(string $id) : bool;
 
-    public function get(string $id) : Game;
+	public function get(string $id) : Game;
 
-    /**
-     * @return array<string, Game>
-     */
-    public function all() : array;
+	/**
+	 * @return array<string, Game>
+	 */
+	public function all() : array;
 }

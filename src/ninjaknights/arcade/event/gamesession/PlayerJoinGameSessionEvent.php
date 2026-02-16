@@ -11,18 +11,18 @@ use pocketmine\event\CancellableTrait;
 use pocketmine\event\Event;
 
 final class PlayerJoinGameSessionEvent extends Event implements Cancellable {
-    use CancellableTrait;
+	use CancellableTrait;
 
-    public function __construct(
-        private readonly GameSession $gameSession,
-        private readonly ArcadePlayer $player
-    ) {}
+	public function __construct(
+		private readonly GameSession $gameSession,
+		private readonly ArcadePlayer $player
+	) {}
 
-    public function getGameSession() : GameSession{
-        return $this->gameSession;
-    }
+	public function getGameSession() : GameSession{
+		return $this->gameSession;
+	}
 
-    public function getPlayer() : ArcadePlayer{
-        return $this->player;
-    }
+	public function getPlayer() : ArcadePlayer{
+		return $this->player;
+	}
 }

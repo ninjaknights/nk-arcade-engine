@@ -8,15 +8,15 @@ use pocketmine\world\Position;
 
 interface Arena {
 
-    public function getName() : string;
+	public function getName() : string;
 
-    /**
-     * @return list<Position>
-     */
-    public function getSpawnPoints() : array;
+	/**
+	 * @return list<Position>
+	 */
+	public function getSpawnPoints() : array;
 
-    /**
-     * Returns the world name this arena belongs to.
-     */
-    public function getWorldName() : string;
+	/**
+	 * Returns the world name this arena belongs to.
+	 */
+	public function getWorldName() : string;
 }

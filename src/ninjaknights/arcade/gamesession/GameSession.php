@@ -14,185 +14,242 @@ use ninjaknights\arcade\game\Game;
 use ninjaknights\arcade\gamesession\policy\DefaultSessionLifecyclePolicy;
 use ninjaknights\arcade\gamesession\policy\SessionLifecyclePolicyInterface;
 use ninjaknights\arcade\player\ArcadePlayer;
+use function count;
+use function in_array;
+use function time;
 
 class GameSession {
 
-    /**
-     * @var array<string, ArcadePlayer>
-     */
-    private array $players = [];
+	/** @var array<string, ArcadePlayer> */
+	private array $players = [];
 
-    private GameState $state = GameState::WAITING;
-    private int $lastActivityAt;
-    private readonly SessionLifecyclePolicyInterface $lifecyclePolicy;
+	private GameState $state = GameState::WAITING;
+	private int $lastActivityAt;
+	private readonly int $createdAt;
+	private readonly SessionLifecyclePolicyInterface $lifecyclePolicy;
+	private ?SessionResult $result = null;
 
-    public function __construct(
-        private readonly string $id,
-        private readonly Game $game,
-        private readonly EventDispatcherInterface $eventDispatcher,
-        ?SessionLifecyclePolicyInterface $lifecyclePolicy = null
-    ) {
-        $this->lastActivityAt = time();
-        $this->lifecyclePolicy = $lifecyclePolicy ?? new DefaultSessionLifecyclePolicy();
-    }
+	public function __construct(
+		private readonly string $id,
+		private readonly Game $game,
+		private readonly EventDispatcherInterface $eventDispatcher,
+		?SessionLifecyclePolicyInterface $lifecyclePolicy = null
+	) {
+		$this->createdAt = time();
+		$this->lastActivityAt = $this->createdAt;
+		$this->lifecyclePolicy = $lifecyclePolicy ?? new DefaultSessionLifecyclePolicy();
+	}
 
-    public function getId() : string{
-        return $this->id;
-    }
+	public function getId() : string{
+		return $this->id;
+	}
 
-    public function getGame() : Game{
-        return $this->game;
-    }
+	public function getGame() : Game{
+		return $this->game;
+	}
 
-    public function getState() : GameState{
-        return $this->state;
-    }
+	public function getState() : GameState{
+		return $this->state;
+	}
 
-    public function getLifecyclePolicy() : SessionLifecyclePolicyInterface{
-        return $this->lifecyclePolicy;
-    }
+	public function getLifecyclePolicy() : SessionLifecyclePolicyInterface{
+		return $this->lifecyclePolicy;
+	}
 
-    public function getLastActivityAt() : int{
-        return $this->lastActivityAt;
-    }
+	public function getLastActivityAt() : int{
+		return $this->lastActivityAt;
+	}
 
-    public function hasPlayer(ArcadePlayer $arcadePlayer) : bool{
-        return isset($this->players[$arcadePlayer->getUniqueId()]);
-    }
+	public function getCreatedAt() : int{
+		return $this->createdAt;
+	}
 
-    public function addPlayer(ArcadePlayer $arcadePlayer) : bool{
-        if($this->state === GameState::ENDING || $this->state === GameState::CLOSED){
-            return false;
-        }
+	public function getResult() : ?SessionResult{
+		return $this->result;
+	}
 
-        if(!$this->lifecyclePolicy->canJoin($this, $arcadePlayer)){
-            return false;
-        }
+	public function getEndReason() : ?EndReason{
+		return $this->result?->getReason();
+	}
 
-        if($this->hasPlayer($arcadePlayer)){
-            return false;
-        }
+	public function getEndDurationSeconds() : ?int{
+		return $this->result?->getDurationSeconds();
+	}
 
-        $joinEvent = new PlayerJoinGameSessionEvent($this, $arcadePlayer);
-        $this->eventDispatcher->dispatch($joinEvent);
-        if($joinEvent->isCancelled()){
-            return false;
-        }
+	/**
+	 * @return list<string>
+	 */
+	public function getWinnerUuids() : array{
+		return $this->result?->getWinnerUuids() ?? [];
+	}
 
-        $key = $arcadePlayer->getUniqueId();
-        $this->players[$key] = $arcadePlayer;
-        $arcadePlayer->setCurrentGameSession($this);
+	public function hasWinner(string $playerUuid) : bool{
+		return in_array($playerUuid, $this->getWinnerUuids(), true);
+	}
 
-        $this->touchActivity();
+	public function hasPlayer(ArcadePlayer $arcadePlayer) : bool{
+		return isset($this->players[$arcadePlayer->getUniqueId()]);
+	}
 
-        if($this->state === GameState::WAITING && $this->lifecyclePolicy->canStart($this)){
-            $this->setState(GameState::STARTING);
-        }
+	public function addPlayer(ArcadePlayer $arcadePlayer) : bool{
+		if($this->state === GameState::ENDING || $this->state === GameState::CLOSED){
+			return false;
+		}
 
-        return true;
-    }
+		if(!$this->lifecyclePolicy->canJoin($this, $arcadePlayer)){
+			return false;
+		}
 
-    public function removePlayer(ArcadePlayer $arcadePlayer) : bool{
-        $key = $arcadePlayer->getUniqueId();
-        if(!isset($this->players[$key])){
-            return false;
-        }
+		if($this->hasPlayer($arcadePlayer)){
+			return false;
+		}
 
-        $leaveEvent = new PlayerLeaveGameSessionEvent($this, $arcadePlayer);
-        $this->eventDispatcher->dispatch($leaveEvent);
-        if($leaveEvent->isCancelled()){
-            return false;
-        }
+		$joinEvent = new PlayerJoinGameSessionEvent($this, $arcadePlayer);
+		$this->eventDispatcher->dispatch($joinEvent);
+		if($joinEvent->isCancelled()){
+			return false;
+		}
 
-        unset($this->players[$key]);
-        $arcadePlayer->setCurrentGameSession(null);
+		$key = $arcadePlayer->getUniqueId();
+		$this->players[$key] = $arcadePlayer;
+		$arcadePlayer->setCurrentGameSession($this);
 
-        $this->touchActivity();
+		$this->touchActivity();
 
-        if($this->lifecyclePolicy->shouldAutoCloseWhenEmpty($this)){
-            $this->end('empty');
-        }
+		if($this->state === GameState::WAITING && $this->lifecyclePolicy->canStart($this)){
+			$this->setState(GameState::STARTING);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * @return array<string, ArcadePlayer>
-     */
-    public function getPlayers() : array{
-        return $this->players;
-    }
+	public function removePlayer(ArcadePlayer $arcadePlayer) : bool{
+		$key = $arcadePlayer->getUniqueId();
+		if(!isset($this->players[$key])){
+			return false;
+		}
 
-    public function getPlayerCount() : int{
-        return count($this->players);
-    }
+		$leaveEvent = new PlayerLeaveGameSessionEvent($this, $arcadePlayer);
+		$this->eventDispatcher->dispatch($leaveEvent);
+		if($leaveEvent->isCancelled()){
+			return false;
+		}
 
-    public function setState(GameState $newState) : void{
-        if($this->state === $newState){
-            return;
-        }
+		unset($this->players[$key]);
+		$arcadePlayer->setCurrentGameSession(null);
 
-        $oldState = $this->state;
-        if(!$this->lifecyclePolicy->canTransition($this, $oldState, $newState)){
-            return;
-        }
+		$this->touchActivity();
 
-        $this->state = $newState;
-        $this->touchActivity();
-        $this->eventDispatcher->dispatch(new GameSessionStateChangeEvent($this, $oldState, $newState));
+		if($this->lifecyclePolicy->shouldAutoCloseWhenEmpty($this)){
+			$this->end(EndReason::EMPTY);
+		}
 
-        if($newState === GameState::IN_PROGRESS){
-            $this->eventDispatcher->dispatch(new GameSessionStartEvent($this));
-        }
-    }
+		return true;
+	}
 
-    public function start() : void{
-        if(!$this->lifecyclePolicy->canStart($this)){
-            return;
-        }
+	/**
+	 * @return array<string, ArcadePlayer>
+	 */
+	public function getPlayers() : array{
+		return $this->players;
+	}
 
-        if($this->state === GameState::WAITING){
-            $this->setState(GameState::STARTING);
-        }
+	public function getPlayerCount() : int{
+		return count($this->players);
+	}
 
-        $this->setState(GameState::IN_PROGRESS);
-    }
+	public function setState(GameState $newState) : void{
+		if($this->state === $newState){
+			return;
+		}
 
-    public function end(string $reason = 'normal') : void{
-        if($this->state === GameState::CLOSED){
-            return;
-        }
+		$oldState = $this->state;
+		if(!$this->lifecyclePolicy->canTransition($this, $oldState, $newState)){
+			return;
+		}
 
-        $this->setState(GameState::ENDING);
-        $this->eventDispatcher->dispatch(new GameSessionEndEvent($this, $reason));
-        $this->cleanupPlayers();
-        $this->setState(GameState::CLOSED);
-    }
+		$this->state = $newState;
+		$this->touchActivity();
+		$this->eventDispatcher->dispatch(new GameSessionStateChangeEvent($this, $oldState, $newState));
 
-    public function close() : void{
-        $this->cleanupPlayers();
-        $this->setState(GameState::CLOSED);
-    }
+		if($newState === GameState::IN_PROGRESS){
+			$this->eventDispatcher->dispatch(new GameSessionStartEvent($this));
+		}
+	}
 
-    public function evaluateLifecycle(int $currentUnixTime = -1) : void{
-        $now = $currentUnixTime === -1 ? time() : $currentUnixTime;
+	public function start() : void{
+		if(!$this->lifecyclePolicy->canStart($this)){
+			return;
+		}
 
-        if($this->lifecyclePolicy->shouldCloseForIdle($this, $now)){
-            $this->end('idle_timeout');
-        }
-    }
+		if($this->state === GameState::WAITING){
+			$this->setState(GameState::STARTING);
+		}
 
-    /**
-     * Removes all player references when the session ends.
-     */
-    private function cleanupPlayers() : void{
-        foreach($this->players as $player){
-            $player->setCurrentGameSession(null);
-        }
-        $this->players = [];
-    }
+		$this->setState(GameState::IN_PROGRESS);
+	}
 
-    private function touchActivity() : void{
-        $this->lastActivityAt = time();
-    }
+	/**
+	 * @param EndReason|string $reason
+	 * @param list<string>     $winnerUuids
+	 */
+	public function end(EndReason|string $reason = EndReason::NORMAL, array $winnerUuids = []) : void{
+		if($this->state === GameState::CLOSED){
+			return;
+		}
+
+		[$normalizedReason, $rawReason] = $this->normalizeEndReason($reason);
+		$this->result = new SessionResult(
+			$normalizedReason,
+			$rawReason,
+			$this->createdAt,
+			time(),
+			$this->getPlayerCount(),
+			$winnerUuids
+		);
+
+		$this->setState(GameState::ENDING);
+		$this->eventDispatcher->dispatch(new GameSessionEndEvent($this, $this->result));
+		$this->cleanupPlayers();
+		$this->setState(GameState::CLOSED);
+	}
+
+	public function close() : void{
+		$this->cleanupPlayers();
+		$this->setState(GameState::CLOSED);
+	}
+
+	public function evaluateLifecycle(int $currentUnixTime = -1) : void{
+		$now = $currentUnixTime === -1 ? time() : $currentUnixTime;
+
+		if($this->lifecyclePolicy->shouldCloseForIdle($this, $now)){
+			$this->end(EndReason::IDLE_TIMEOUT);
+		}
+	}
+
+	/**
+	 * Removes all player references when the session ends.
+	 */
+	private function cleanupPlayers() : void{
+		foreach($this->players as $player){
+			$player->setCurrentGameSession(null);
+		}
+		$this->players = [];
+	}
+
+	private function touchActivity() : void{
+		$this->lastActivityAt = time();
+	}
+
+	/**
+	 * @param EndReason|string $reason
+	 * @return array{0: EndReason, 1: string}
+	 */
+	private function normalizeEndReason(EndReason|string $reason) : array{
+		if($reason instanceof EndReason){
+			return [$reason, $reason->value];
+		}
+
+		return [EndReason::fromRaw($reason), $reason];
+	}
 }

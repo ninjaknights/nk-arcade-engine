@@ -10,21 +10,21 @@ use pocketmine\event\Event;
 
 final class GameSessionStateChangeEvent extends Event {
 
-    public function __construct(
-        private readonly GameSession $gameSession,
-        private readonly GameState $oldState,
-        private readonly GameState $newState
-    ) {}
+	public function __construct(
+		private readonly GameSession $gameSession,
+		private readonly GameState $oldState,
+		private readonly GameState $newState
+	) {}
 
-    public function getGameSession() : GameSession{
-        return $this->gameSession;
-    }
+	public function getGameSession() : GameSession{
+		return $this->gameSession;
+	}
 
-    public function getOldState() : GameState{
-        return $this->oldState;
-    }
+	public function getOldState() : GameState{
+		return $this->oldState;
+	}
 
-    public function getNewState() : GameState{
-        return $this->newState;
-    }
+	public function getNewState() : GameState{
+		return $this->newState;
+	}
 }

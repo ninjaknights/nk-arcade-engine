@@ -8,5 +8,5 @@ use pocketmine\event\Event;
 
 interface EventDispatcherInterface {
 
-    public function dispatch(Event $event) : void;
+	public function dispatch(Event $event) : void;
 }

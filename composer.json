@@ -4,7 +4,8 @@
     "type": "library",
     "license": "GPL-3.0",
     "require-dev": {
-        "pocketmine/pocketmine-mp": "^5.0.0"
+        "pocketmine/pocketmine-mp": "^5.0.0",
+        "friendsofphp/php-cs-fixer": "^3.94"
     },
     "autoload": {
         "classmap": ["src"]

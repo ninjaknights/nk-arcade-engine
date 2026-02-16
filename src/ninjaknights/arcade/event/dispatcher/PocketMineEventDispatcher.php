@@ -8,9 +8,9 @@ use pocketmine\event\Event;
 
 final class PocketMineEventDispatcher implements EventDispatcherInterface {
 
-    public function __construct() {}
+	public function __construct() {}
 
-    public function dispatch(Event $event) : void{
-        $event->call();
-    }
+	public function dispatch(Event $event) : void{
+		$event->call();
+	}
 }

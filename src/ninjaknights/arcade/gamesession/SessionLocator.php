@@ -8,51 +8,51 @@ use ninjaknights\arcade\player\ArcadePlayer;
 
 final class SessionLocator implements SessionLocatorInterface {
 
-    /**
-     * @param \Closure() : array<string, GameSession> $sessionsProvider
-     */
-    public function __construct(private readonly \Closure $sessionsProvider) {}
+	/**
+	 * @param \Closure() : array<string, GameSession> $sessionsProvider
+	 */
+	public function __construct(private readonly \Closure $sessionsProvider) {}
 
-    public function findById(string $sessionId) : ?GameSession{
-        return $this->all()[$sessionId] ?? null;
-    }
+	public function findById(string $sessionId) : ?GameSession{
+		return $this->all()[$sessionId] ?? null;
+	}
 
-    public function findByPlayer(ArcadePlayer $player) : ?GameSession{
-        foreach($this->all() as $session){
-            if($session->hasPlayer($player)){
-                return $session;
-            }
-        }
+	public function findByPlayer(ArcadePlayer $player) : ?GameSession{
+		foreach($this->all() as $session){
+			if($session->hasPlayer($player)){
+				return $session;
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public function findByGameId(string $gameId) : array{
-        $sessions = [];
+	public function findByGameId(string $gameId) : array{
+		$sessions = [];
 
-        foreach($this->all() as $session){
-            if($session->getGame()->getId() === $gameId){
-                $sessions[] = $session;
-            }
-        }
+		foreach($this->all() as $session){
+			if($session->getGame()->getId() === $gameId){
+				$sessions[] = $session;
+			}
+		}
 
-        return $sessions;
-    }
+		return $sessions;
+	}
 
-    public function findByState(GameState $state) : array{
-        $sessions = [];
+	public function findByState(GameState $state) : array{
+		$sessions = [];
 
-        foreach($this->all() as $session){
-            if($session->getState() === $state){
-                $sessions[] = $session;
-            }
-        }
+		foreach($this->all() as $session){
+			if($session->getState() === $state){
+				$sessions[] = $session;
+			}
+		}
 
-        return $sessions;
-    }
+		return $sessions;
+	}
 
-    public function all() : array{
-        $sessions = ($this->sessionsProvider)();
-        return $sessions;
-    }
+	public function all() : array{
+		$sessions = ($this->sessionsProvider)();
+		return $sessions;
+	}
 }

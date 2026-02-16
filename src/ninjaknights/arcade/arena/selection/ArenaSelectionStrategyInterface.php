@@ -8,9 +8,9 @@ use ninjaknights\arcade\arena\Arena;
 
 interface ArenaSelectionStrategyInterface {
 
-    /**
-     * @param list<Arena> $availableArenas
-     * @param array<string, int> $usageCountByArenaName
-     */
-    public function select(array $availableArenas, array $usageCountByArenaName = []) : ?Arena;
+	/**
+	 * @param list<Arena>        $availableArenas
+	 * @param array<string, int> $usageCountByArenaName
+	 */
+	public function select(array $availableArenas, array $usageCountByArenaName = []) : ?Arena;
 }

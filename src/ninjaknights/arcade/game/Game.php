@@ -9,14 +9,14 @@ use ninjaknights\arcade\gamesession\GameSession;
 
 interface Game {
 
-    public function getId() : string;
+	public function getId() : string;
 
-    public function getInfo() : GameInfo;
+	public function getInfo() : GameInfo;
 
-    /**
-     * Creates a new game session for this game type.
-     * The EventDispatcherInterface is provided by the ArcadeEngine
-     * so game implementations don't need to manage it themselves.
-     */
-    public function createGameSession(EventDispatcherInterface $eventDispatcher) : GameSession;
+	/**
+	 * Creates a new game session for this game type.
+	 * The EventDispatcherInterface is provided by the ArcadeEngine
+	 * so game implementations don't need to manage it themselves.
+	 */
+	public function createGameSession(EventDispatcherInterface $eventDispatcher) : GameSession;
 }
